@@ -3,13 +3,11 @@ const ctx2 = c2.getContext("2d");
 
 let score = 0
 
-ctx2.font = '30px Arial'
-ctx2.fillText(`score : ${score}`, 700, 60)
-
 function addScore(points) {
   score += points
   ctx2.clearRect(700,0,300,100)
   ctx2.fillStyle = `#000000`
+  ctx2.font = '30px Arial'
   ctx2.fillText(`score : ${score}`, 700, 60)
 }
 

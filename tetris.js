@@ -13,20 +13,34 @@ const shapes = {
 
 const colours = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#CD853F']
 
-let activeShape = randomShape()
-let nextShape = randomShape()
-displayNext(nextShape)
-
+let activeShape = []
+let nextShape = []
 let filledSquares = []
-let gameSpeed = 1000
-let moveCount = 10000
+let gameSpeed = 0
+let moveCount = 0
+let gameID = ''
 
-document.addEventListener("keydown", keyDownHandler, false);
+startGame()
 
-spawnShape(activeShape)
+function startGame() {
+    ctx.clearRect(0, 0, 1005, 905)
+    activeShape = randomShape()
+    nextShape = randomShape()
+    clearDisplay()
+    displayNext(nextShape)
 
-const gameID = setInterval(speedControl, 100)
+    filledSquares = []
+    gameSpeed = 1000
+    moveCount = 10000
+    score = 0
+    addScore(0)
 
+    document.addEventListener("keydown", keyDownHandler, false);
+
+    spawnShape(activeShape)
+
+    gameID = setInterval(speedControl, 100)
+}
 function speedControl() {
     moveCount -= gameSpeed
     filledSquares.forEach(filledSquare => {
@@ -110,12 +124,8 @@ function keyDownHandler(e) {
 function gameOver() {
     document.removeEventListener("keydown", keyDownHandler);
     clearInterval(gameID)
-    ctx.clearRect(0,0,1005,905)
-    ctx.fillStyle = '#666666'
-    ctx.fillRect(250, 200, 500, 400)
-    ctx.fillStyle = '#FF0000'
-    ctx.font = '80px Ariel'
-    ctx.fillText('Game Over', 320, 420, 350)
+    drawEndScreen()
+    document.addEventListener('click', clickRetry, false)
 }
 
 
@@ -137,7 +147,6 @@ function spawnShape(shape) {
   } 
   
   function downOne(shape) {
-      console.log(shape)
     return shape.map(square => square.map((v,c) => c === 1 ? v + 1 : v))
   }
   
@@ -229,4 +238,30 @@ function spawnShape(shape) {
         return true
     }
     return false
+  }
+
+  function drawEndScreen() {
+    ctx.clearRect(0, 0, 1005, 905)
+    ctx.fillStyle = '#666666'
+    ctx.fillRect(250, 200, 500, 400)
+    ctx.fillStyle = '#333333'
+    ctx.fillRect(350, 450, 300, 100)
+    ctx.font = '80px Arial'
+    ctx.fillStyle = '#000000'
+    ctx.fillText('Final Score', 300, 300, 400)
+    ctx.fillText(score, 400, 400, 400)
+    ctx.font = '70px Arial'
+    ctx.fillText('Retry', 415, 520, 400)
+  }
+
+  function clickRetry(e) {
+    if (
+      e.clientX > 810 && 
+      e.clientX < 1110 &&
+      e.clientY > 565 && 
+      e.clientY < 660
+    ) {
+      startGame()
+    }
+    console.log(e)
   }
