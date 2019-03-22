@@ -1,0 +1,28 @@
+{
+  "name": "tetris",
+  "version": "2.0.0",
+  "description": "An in-browser javascript tetris game. Fun for all",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/programbears/tetris.git"
+  },
+  "keywords": [],
+  "author": "Programbears",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/programbears/tetris/issues"
+  },
+  "homepage": "https://github.com/programbears/tetris#readme",
+  "devDependencies": {
+    "eslint": "^5.15.3"
+  },
+  "dependencies": {
+    "express": "^4.16.4",
+    "express-subdomain": "^1.0.5"
+  }
+}

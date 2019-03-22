@@ -1,0 +1,80 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 10px;
+    overflow: hidden;
+
+    display: grid;
+    grid-template-rows: 100px 1fr;
+    grid-gap: 10px;
+}
+
+#arcade-controller {
+    background: #dadada;
+    margin: -10px -10px 0 -10px;
+    padding: 10px;
+}
+
+#arcade {
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-auto-rows: 1fr;
+    grid-auto-flow: row;
+    grid-gap: 5px;
+}
+
+.game {
+    margin: auto;
+    height: 100%;
+    max-height: 500px;
+    width: 300px;
+
+    display: grid;
+    grid-template-rows: 50px 1fr;
+
+    background: #dadada;
+    grid-gap: 5px;
+
+    border: 5px solid #dadada;
+}
+
+.scoreboard {
+    background: #e9e9e9;
+
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 3fr 1fr;
+    grid-template-areas: "input score" "start score";
+    grid-gap: 2px;
+}
+.scoreboard.in-game {
+    grid-template-areas: "score score" "score score";
+}
+.scoreboard.in-game button, .scoreboard.in-game select {
+    display: none;
+}
+
+.scoreboard button {
+    grid-area: start;
+}
+.scoreboard select {
+    grid-area: input;
+}
+.scoreboard span {
+    grid-area: score;
+
+    margin: auto;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+
+    background: white;
+}
