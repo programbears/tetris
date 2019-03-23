@@ -56,27 +56,36 @@ export class HumanController extends InputController {
     constructor(game) {
         super(game);
 
-        document.addEventListener('keydown', (e) => {
-            switch (e.key) {
-            case 'ArrowLeft':
-                this.game.input('LEFT');
-                break;
-            case 'ArrowRight':
-                this.game.input('RIGHT');
-                break;
-            case 'ArrowDown':
-                this.game.input('DOWN');
-                break;
-            case 'ArrowUp':
-            case ' ':
-                this.game.input('ROTATE');
-            }
-        });
+        this.handler = this.keydownHandler.bind(this);
+        document.addEventListener('keydown', this.handler);
     }
+
+    keydownHandler(e) {
+        switch (e.key) {
+        case 'ArrowLeft':
+            this.game.input('LEFT');
+            break;
+        case 'ArrowRight':
+            this.game.input('RIGHT');
+            break;
+        case 'ArrowDown':
+            this.game.input('DOWN');
+            break;
+        case 'ArrowUp':
+        case ' ':
+            this.game.input('ROTATE');
+        }
+    }
+
     onframe() {}
     onscore() {}
     onlevel() {}
     ongameover() {
         this.kill();
+    }
+
+    kill() {
+        document.removeEventListener('keydown', this.handler);
+        InputController.prototype.kill.call(this);
     }
 }
