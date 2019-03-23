@@ -10,17 +10,9 @@ export class GameController {
         this.ctx = canvas.getContext('2d');
 
         this.dimensions = dimensions;
+        this.initialLevel = level;
 
-        this.currentShape = null;
-        // start with squares offscreen at bottom filled
-        this.filledSquares =  (new Array(dimensions[0])).fill(null).map((val, x) => {
-            return [x, dimensions[1]];
-        });
-
-        this.score = 0;
-        this.level = level;
-        this.nextLevel = 100;
-        this.ticksUntilRender = 10;
+        this.reset();
     }
 
     get events() {
@@ -143,6 +135,18 @@ export class GameController {
         if (this.currentShape) this.currentShape.squares.forEach((square) => drawSquare(square, this.currentShape.color));
     }
 
+    reset() {
+        this.currentShape = null;
+        // start with squares offscreen at bottom filled
+        this.filledSquares =  (new Array(this.dimensions[0])).fill(null).map((val, x) => {
+            return [x, this.dimensions[1]];
+        });
+
+        this.score = 0;
+        this.level = this.initialLevel;
+        this.nextLevel = 100;
+        this.ticksUntilRender = 10;
+    }
     tick() {
         this.ticksUntilRender -= this.level;
         if (this.ticksUntilRender <= 0) {
@@ -152,6 +156,8 @@ export class GameController {
         this.draw();
     }
     start() {
+        this.reset();
+
         this.clock = setInterval(this.tick.bind(this), TICK_INTERVAL);
         this.spawnShape();
         this.tick();
