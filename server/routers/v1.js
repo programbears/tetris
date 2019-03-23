@@ -2,7 +2,6 @@ const express = require('express');
 const logger = require('../lib/logger')('v1');
 const { serveStatic } = require('../lib/utils');
 
-const fs = require('fs');
 const path = require('path');
 
 const router = new express.Router();
