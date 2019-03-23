@@ -1,3 +1,5 @@
+/* global AVAILABLE_AI */
+
 import { GameController } from './js/game.js';
 import { AIController, HumanController } from './js/input.js';
 
@@ -29,7 +31,9 @@ class Tetris {
 
         this.$input = document.createElement('select');
         this.$input.append(new Option('Human', ''));
-        this.$input.append(new Option('AI 1', 'ai1.js'));
+        AVAILABLE_AI.forEach((ai) => {
+            this.$input.append(new Option(ai));
+        });
         this.$scoreboard.append(this.$input);
 
         const $start = document.createElement('button');
