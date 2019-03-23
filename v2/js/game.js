@@ -23,6 +23,10 @@ export class GameController {
         this.ticksUntilRender = 10;
     }
 
+    get events() {
+        return ['frame', 'score', 'level', 'gameover'];
+    }
+
     incrementScore(n) {
         this.score += n;
         if (this.score > this.nextLevel) {
@@ -104,10 +108,9 @@ export class GameController {
             }));
     }
     emitFrame() {
-        let event = new CustomEvent('frame', {
+        this.emitter.dispatchEvent(new CustomEvent('frame', {
             detail: { frame: this.frame },
-        });
-        this.emitter.dispatchEvent(event);
+        }));
     }
     render() {
         if (this.isValidPosition(this.currentShape.down(false))) {

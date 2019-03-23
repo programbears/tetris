@@ -1,26 +1,55 @@
 class InputController {
     constructor(game) {
         this.game = game;
-        game.emitter.addEventListener('frame', (data) => this.onFrame(data.detail));
+
+        this.handlers = this.game.events.reduce((handlers, event) => {
+            if (!this[`on${event}`]) {
+                this[`on${event}`] = () => window['console']
+                    .warn(`"${event}" event handler not implemented for InputController: ${this.constructor.name}`);
+            }
+            handlers[event] = (data) => this[`on${event}`](data.detail);
+            this.game.emitter.addEventListener(event, handlers[event]);
+            return handlers;
+        }, {});
     }
-    onFrame(/* data */) { }
-    onInput(input) {
-        this.game.input(input);
+
+    kill() {
+        this.game.events.forEach((event) => {
+            this.game.emitter.removeEventListener(event, this.handlers[event]);
+        });
     }
 }
 
 export class AIController extends InputController {
-    constructor(game, path) {
+    constructor(game, src) {
         super(game);
 
-        this.worker = new Worker(path);
-        this.worker.onMessage(this.receive);
+        this.worker = new Worker(`./ai/${src}`);
+        this.worker.onmessage = this.receive.bind(this);
     }
-    onFrame(frame) {
-        this.worker.postMessage({ type: 'frame', data: frame });
+    send(message) {
+        this.worker.postMessage(message);
     }
     receive(message) {
-        this.game.input(/*...*/);
+        if (message.data.type === 'input') {
+            this.game.input(message.data.input);
+        } else {
+            window['console'].warn('Unrecognised message received from AI worker:', message.data);
+        }
+    }
+
+    onframe({ frame }) {
+        this.send({ type: 'frame', frame });
+    }
+    onscore({ change, current }) {
+        this.send({ type: 'score', change, current });
+    }
+    onlevel({ current, next }) {
+        this.send({ type: 'level', current, next });
+    }
+    ongameover() {
+        this.send({ type: 'gameover' });
+        this.kill();
     }
 }
 export class HumanController extends InputController {
@@ -30,24 +59,24 @@ export class HumanController extends InputController {
         document.addEventListener('keydown', (e) => {
             switch (e.key) {
             case 'ArrowLeft':
-                this.onInput('LEFT');
+                this.game.input('LEFT');
                 break;
             case 'ArrowRight':
-                this.onInput('RIGHT');
+                this.game.input('RIGHT');
                 break;
             case 'ArrowDown':
-                this.onInput('DOWN');
+                this.game.input('DOWN');
                 break;
             case 'ArrowUp':
             case ' ':
-                this.onInput('ROTATE');
+                this.game.input('ROTATE');
             }
         });
     }
-    onFrame(data) {
-        // console.log('frame'); // eslint-disable-line
-        // data.frame.forEach((col, idx) => {
-        //     console.log(idx, JSON.stringify(col)); // eslint-disable-line
-        // });
+    onframe() {}
+    onscore() {}
+    onlevel() {}
+    ongameover() {
+        this.kill();
     }
 }
