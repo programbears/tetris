@@ -1,6 +1,7 @@
 import { GenericShape, TetrisShapes } from './shapes.js';
 
 const COLOURS = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#CD853F'];
+
 const TICK_INTERVAL = 100;
 export class GameController {
     constructor(canvas, { dimensions = [10, 20], level = 1 } = {}) {
@@ -18,21 +19,50 @@ export class GameController {
     get events() {
         return ['frame', 'score', 'level', 'gameover'];
     }
+    emitframe() {
+        this.emitter.dispatchEvent(new CustomEvent('frame', {
+            detail: { frame: this.frame },
+        }));
+    }
+    emitnewshape() { // not in events list as only used internally
+        this.emitter.dispatchEvent(new CustomEvent('newshape', {
+            detail: { current: this.currentShape, next: this.nextShape },
+        }));
+    }
+    emitlevel() {
+        this.emitter.dispatchEvent(new CustomEvent('level', {
+            detail: { current: this.level, next: this.nextLevel },
+        }));
+    }
+    emitscore(change) {
+        this.emitter.dispatchEvent(new CustomEvent('score', {
+            detail: { current: this.score, change },
+        }));
+    }
+    emitgameover() {
+        this.emitter.dispatchEvent(new CustomEvent('gameover'));
+    }
 
     incrementScore(n) {
         this.score += n;
         if (this.score > this.nextLevel) {
             this.level++;
             this.nextLevel += 100;
-            this.emitter.dispatchEvent(new CustomEvent('level', {
-                detail: { current: this.level, next: this.nextLevel },
-            }));
+            this.emitlevel();
         }
-        this.emitter.dispatchEvent(new CustomEvent('score', {
-            detail: { current: this.score, change: n },
-        }));
+        this.emitscore(n);
     }
 
+    get nextShape() {
+        return this.shapeQueue[0];
+    }
+    generateShape() {
+        let color = COLOURS[Math.floor(Math.random()*COLOURS.length)];
+        let position = [Math.floor(this.dimensions[0] / 2), 0];
+        let idx = Math.floor(Math.random()*Object.keys(TetrisShapes).length);
+        let key = Object.keys(TetrisShapes)[idx];
+        return new TetrisShapes[key]({ color, position });
+    }
     spawnShape(shape) {
         let color = COLOURS[Math.floor(Math.random()*COLOURS.length)];
         let position = [Math.floor(this.dimensions[0] / 2), 0];
@@ -41,9 +71,10 @@ export class GameController {
         } else if (shape in TetrisShapes) {
             this.currentShape = new TetrisShapes[shape]({ color, position });
         } else {
-            let shapeKey = Object.keys(TetrisShapes)[Math.floor(Math.random()*Object.keys(TetrisShapes).length)];
-            this.currentShape = new TetrisShapes[shapeKey]({ color, position });
+            this.currentShape = this.shapeQueue.shift();
+            this.shapeQueue.push(this.generateShape());
         }
+        this.emitnewshape();
     }
     resolveShapeState() {
         let currentShapeBottomed = this.currentShape.squares.some((square) => {
@@ -79,7 +110,6 @@ export class GameController {
         if (gameOver) {
             clearInterval(this.clock);
             this.currentShape = null;
-            this.emitter.dispatchEvent(new CustomEvent('gameover'));
         }
     }
     resolveState() {
@@ -99,11 +129,6 @@ export class GameController {
                 return 0;
             }));
     }
-    emitFrame() {
-        this.emitter.dispatchEvent(new CustomEvent('frame', {
-            detail: { frame: this.frame },
-        }));
-    }
     render() {
         if (this.isValidPosition(this.currentShape.down(false))) {
             this.currentShape.down();
@@ -112,7 +137,7 @@ export class GameController {
         }
         this.resolveLinesState();
         this.resolveGameState();
-        this.emitFrame();
+        this.emitframe();
     }
     draw() {
         const width = this.canvas.scrollWidth;
@@ -141,6 +166,7 @@ export class GameController {
         this.filledSquares =  (new Array(this.dimensions[0])).fill(null).map((val, x) => {
             return [x, this.dimensions[1]];
         });
+        this.shapeQueue = [this.generateShape(), this.generateShape(), this.generateShape()];
 
         this.score = 0;
         this.level = this.initialLevel;
@@ -193,7 +219,7 @@ export class GameController {
             if (this.isValidPosition(this.currentShape.rotate(false)))
                 this.currentShape.rotate();
         }
-        this.emitFrame();
+        this.emitframe();
         this.draw();
     }
 }

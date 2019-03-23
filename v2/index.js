@@ -25,6 +25,9 @@ class Tetris {
         this.$bestPlayer = this.$stats.getElementsByClassName('best-player value')[0];
 
         this.gameController = new GameController(this.$canvas, { scoreElement: this.$score });
+        this.gameController.emitter.addEventListener('newshape', (data) => {
+            this.showNextShape(data.detail.next);
+        });
         this.gameController.emitter.addEventListener('score', (data) => {
             this.$score.textContent = data.detail.current;
             if (data.detail.current > tetrisHighscore.value) {
@@ -58,14 +61,34 @@ class Tetris {
         this.$score.textContent = 0;
         this.$scoreboard.append(this.$score);
 
-        this.$nextPiece = document.createElement('canvas');
-        this.$nextPiece.classList.add('next');
-        this.$scoreboard.append(this.$nextPiece);
+        this.$nextShape = document.createElement('canvas');
+        this.$nextShape.classList.add('next');
+        this.nextShape = this.$nextShape.getContext('2d');
+        this.$scoreboard.append(this.$nextShape);
 
         return this.$scoreboard;
     }
     showButtons(show = true) {
         this.$scoreboard.classList.toggle('in-game', !show);
+    }
+    showNextShape(shape) {
+        const width = this.$nextShape.scrollWidth;
+        const height = this.$nextShape.scrollHeight;
+
+        this.nextShape.canvas.width = width;
+        this.nextShape.canvas.height = height;
+
+        const boxWidth = width/6;
+        const boxHeight = height/4;
+
+        this.nextShape.clearRect(0, 0, width, height);
+
+        shape._squares.forEach((square) => {
+            this.nextShape.fillStyle = '#000000';
+            this.nextShape.fillRect((square[0]+1)*boxWidth, (square[1]+1)*boxHeight, boxWidth, boxHeight);
+            this.nextShape.fillStyle = shape.color;
+            this.nextShape.fillRect((square[0]+1)*boxWidth + 1, (square[1]+1)*boxHeight + 1, boxWidth - 2, boxHeight - 2);
+        });
     }
     startGame() {
         this.setInputMethod(this.$input.value || false);
