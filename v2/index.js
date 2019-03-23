@@ -4,23 +4,36 @@ import { GameController } from './js/game.js';
 import { AIController, HumanController } from './js/input.js';
 
 const arcade = document.getElementById('arcade');
-let gameCounter = 0;
+let tetrisCounter = 0;
+let tetrisHighscore = { value: 0, player: null };
 class Tetris {
     constructor() {
         this.$el = document.createElement('div');
         this.$el.classList.add('game');
 
         this.$el.append(this.createScoreboard());
+        this.$el.classList.add(`tetris-${++tetrisCounter}`);
 
         this.$canvas = document.createElement('canvas');
-        this.$canvas.id = `game-${++gameCounter}`;
+        this.$canvas.id = `game-${++tetrisCounter}`;
         this.$el.append(this.$canvas);
 
         this.showButtons();
 
+        this.$stats = document.getElementsByClassName('arcade-game tetris')[0];
+        this.$highScore = this.$stats.getElementsByClassName('high-score value')[0];
+        this.$bestPlayer = this.$stats.getElementsByClassName('best-player value')[0];
+
         this.gameController = new GameController(this.$canvas, { scoreElement: this.$score });
         this.gameController.emitter.addEventListener('score', (data) => {
             this.$score.textContent = data.detail.current;
+            if (data.detail.current > tetrisHighscore.value) {
+                this.$highScore.textContent = data.detail.current;
+                this.$bestPlayer.textContent = this.inputMethod;
+            }
+        });
+        this.gameController.emitter.addEventListener('gameover', () => {
+            this.showButtons(true);
         });
     }
     createScoreboard() {
@@ -45,6 +58,10 @@ class Tetris {
         this.$score.textContent = 0;
         this.$scoreboard.append(this.$score);
 
+        this.$nextPiece = document.createElement('canvas');
+        this.$nextPiece.classList.add('next');
+        this.$scoreboard.append(this.$nextPiece);
+
         return this.$scoreboard;
     }
     showButtons(show = true) {
@@ -56,6 +73,7 @@ class Tetris {
         this.gameController.start();
     }
     setInputMethod(ai = false) {
+        this.inputMethod = ai || 'Human';
         this.inputController =  ai ?
             new AIController(this.gameController, ai) :
             new HumanController(this.gameController);
@@ -67,5 +85,5 @@ function onClickNewGame() {
 
     arcade.append(game.$el);
 }
-document.getElementById('new-game-btn')
+document.getElementById('add-tetris')
     .addEventListener('click', onClickNewGame);

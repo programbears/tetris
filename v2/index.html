@@ -1,11 +1,19 @@
 <html>
 <head>
     <title>Tetris (v2)</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="arcade-controller">
-        <button id="new-game-btn">New Game</button>
+        <div class="arcade-game tetris">
+            <span class="name">Tetris</span>
+            <span class="high-score key">High Score</span>
+            <span class="high-score value">0</span>
+            <span class="best-player key">Best Player</span>
+            <span class="best-player value">N/A</span>
+            <button class="add" id="add-tetris">Add Game</button>
+        </div>
     </div>
     <div id="arcade"></div>
 
