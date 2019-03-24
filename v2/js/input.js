@@ -50,6 +50,9 @@ export class AIController extends InputController {
     onframe({ frame }) {
         this.latestFrame = frame;
     }
+    onnewshape({ current, next }) {
+        this.send({ type: 'newshape', current: current._squares, next: next._squares });
+    }
     onscore({ change, current }) {
         this.send({ type: 'score', change, current });
     }
@@ -87,6 +90,7 @@ export class HumanController extends InputController {
     }
 
     onframe() {}
+    onnewshape() {}
     onscore() {}
     onlevel() {}
     ongameover() {
