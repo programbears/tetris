@@ -26,6 +26,15 @@ export class AIController extends InputController {
 
         this.worker = new Worker(`./ai/${src}`);
         this.worker.onmessage = this.receive.bind(this);
+
+        // only send frames every 50ms
+        this.latestFrame = null;
+        setInterval(() => {
+            if (!this.latestFrame) return;
+
+            this.send({ type: 'frame', frame: this.latestFrame });
+            this.latestFrame = null;
+        }, 50);
     }
     send(message) {
         this.worker.postMessage(message);
@@ -39,7 +48,7 @@ export class AIController extends InputController {
     }
 
     onframe({ frame }) {
-        this.send({ type: 'frame', frame });
+        this.latestFrame = frame;
     }
     onscore({ change, current }) {
         this.send({ type: 'score', change, current });
