@@ -14,10 +14,11 @@ export class GameController {
         this.initialLevel = level;
 
         this.reset();
+        this.paused = true;
     }
 
     get events() {
-        return ['frame', 'score', 'level', 'gameover'];
+        return ['frame', 'newshape', 'score', 'level', 'gameover'];
     }
     emitframe() {
         this.emitter.dispatchEvent(new CustomEvent('frame', {
@@ -110,6 +111,8 @@ export class GameController {
         if (gameOver) {
             clearInterval(this.clock);
             this.currentShape = null;
+            this.paused = true;
+            this.emitgameover();
         }
     }
     resolveState() {
@@ -187,6 +190,16 @@ export class GameController {
         this.clock = setInterval(this.tick.bind(this), TICK_INTERVAL);
         this.spawnShape();
         this.tick();
+        this.paused = false;
+    }
+    pause() {
+        clearInterval(this.clock);
+        this.paused = true;
+    }
+    resume() {
+        if (!this.currentShape) return;
+        this.clock = setInterval(this.tick.bind(this), TICK_INTERVAL);
+        this.paused = false;
     }
 
     isValidPosition(squares) {
@@ -203,6 +216,7 @@ export class GameController {
     }
 
     input(action) {
+        if (this.paused) return;
         if (!this.currentShape) return;
         if (action === 'DOWN') {
             if (this.isValidPosition(this.currentShape.down(false)))
@@ -218,6 +232,8 @@ export class GameController {
         } else if (action === 'ROTATE') {
             if (this.isValidPosition(this.currentShape.rotate(false)))
                 this.currentShape.rotate();
+        } else if (action === 'PAUSE') {
+            this.pause();
         }
         this.emitframe();
         this.draw();
