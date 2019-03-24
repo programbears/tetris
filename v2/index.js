@@ -38,6 +38,10 @@ class Tetris {
         this.gameController.emitter.addEventListener('gameover', () => {
             this.showButtons(true);
         });
+
+        this.$canvas.addEventListener('click', () => {
+            return this.gameController.paused ? this.gameController.resume() : this.gameController.pause();
+        });
     }
     createScoreboard() {
         if (this.$scoreboard) return this.$scoreboard;
